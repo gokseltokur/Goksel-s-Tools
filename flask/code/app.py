@@ -1,8 +1,14 @@
 from flask import Flask, request
 from flask_restful import Resource, Api
+from flask_jwt import JWT, jwt_required
+
+from security import authenticate, identity
 
 app = Flask(__name__)
+app.secret_key = 'jose' # Authentication
 api = Api(app)
+
+jwt = JWT(app, authenticate, identity) # /auth
 
 items = []
 
@@ -10,6 +16,7 @@ items = []
 # Every resource has to be class
 # student inherits resource **
 class Item(Resource):
+    @jwt_required() # we need to authenticate to get 
     def get(self, name):
         item = next(filter(lambda x: x['name'] == name, items), None) # loopla aramaktan tek satira dusuruyor next ve filter
         return {'item': item}, 200 if item else 404 # 404 not found STATUS CODE are important for mobile apps to checks
